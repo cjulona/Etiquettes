@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Étiquettes Macarons Avery L7160</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f8fafc;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.1);
+}
+
+h1 {
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+}
+
+button {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.btn-print {
+    background: #2563eb;
+}
+
+.preview {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.label {
+    width: 63.5mm;
+    height: 38.1mm;
+
+    padding: 3mm;
+
+    border: 1px solid #ddd;
+
+    font-size: 10pt;
+    line-height: 1;
+
+    overflow: hidden;
+
+    background: white;
+}
+
+.product {
+    text-align: center;
+    font-size: 12pt;
+    font-weight: bold;
+    margin-bottom: 1mm;
+}
+
+.mt {
+    margin-top: 1mm;
+}
+
+.sheet {
+    display: none;
+}
+
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+
+@media print {
+
+    body * {
+        visibility: hidden;
+    }
+
+    .sheet,
+    .sheet * {
+        visibility: visible;
+    }
+
+    .sheet {
+        display: grid !important;
+
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        width: 210mm;
+        height: 297mm;
+
+        padding-top: 15.15mm;
+        padding-left: 7.25mm;
+
+        grid-template-columns: repeat(3, 63.5mm);
+        grid-template-rows: repeat(7, 38.1mm);
+
+        column-gap: 2.5mm;
+        row-gap: 0;
+
+        background: white;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>Étiquettes Macarons Avery L7160</h1>
+
+        <label>Date de fabrication</label>
+
+        <input type="date" id="fab">
+
+        <p>
+            <strong>Date limite de consommation :</strong>
+            <span id="dlc"></span>
+        </p>
+
+        <label>Première étiquette</label>
+
+        <select id="start"></select>
+
+        <label>Nombre d'étiquettes</label>
+
+        <input
+            type="number"
+            id="qty"
+            min="1"
+            max="21"
+            value="21">
+
+        <button class="btn-print" onclick="window.print()">
+            Imprimer
+        </button>
+
+        <div class="preview">
+            <div id="preview"></div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="sheet" id="sheet"></div>
+
+<script>
+
+function formatFR(dateString) {
+    const [y,m,d] = dateString.split("-");
+    return `${d}/${m}/${y}`;
+}
+
+function addDays(dateString, days) {
+    const d = new Date(dateString);
+    d.setDate(d.getDate() + days);
+
+    return d.toISOString().split("T")[0];
+}
+
+function createLabel(fab, dlc) {
+
+    return `
+        <div class="label">
+
+            <div class="product">
+                Macaron
+            </div>
+
+            <div>
+                <strong>Ingredients :</strong>
+            </div>
+
+            <div>Sucre, beurre, lait, cacao,</div>
+            <div>Gruau, coco, vanille</div>
+
+            <div class="mt">
+                Date de fabrication :
+                <strong>${formatFR(fab)}</strong>
+            </div>
+
+            <div>
+                Date limite de conso :
+                <strong>${formatFR(dlc)}</strong>
+            </div>
+
+        </div>
+    `;
+}
+
+function refresh() {
+
+    const fab = document.getElementById("fab").value;
+    const qty = Number(document.getElementById("qty").value);
+    const start = Number(document.getElementById("start").value);
+
+    const dlc = addDays(fab, 6);
+
+    document.getElementById("dlc").textContent =
+        formatFR(dlc);
+
+    document.getElementById("preview").innerHTML =
+        createLabel(fab, dlc);
+
+    const sheet = document.getElementById("sheet");
+
+    sheet.innerHTML = "";
+
+    for (let i = 1; i <= 21; i++) {
+
+        if (
+            i >= start &&
+            i < start + qty
+        ) {
+            sheet.innerHTML += createLabel(
+                fab,
+                dlc
+            );
+        }
+        else {
+            sheet.innerHTML += "<div></div>";
+        }
+    }
+}
+
+const today =
+    new Date().toISOString().split("T")[0];
+
+document.getElementById("fab").value =
+    today;
+
+for(let i=1;i<=21;i++){
+
+    const option =
+        document.createElement("option");
+
+    option.value = i;
+    option.textContent = i;
+
+    document
+        .getElementById("start")
+        .appendChild(option);
+}
+
+document.getElementById("start").value = 1;
+
+document
+    .getElementById("fab")
+    .addEventListener("change", refresh);
+
+document
+    .getElementById("qty")
+    .addEventListener("input", refresh);
+
+document
+    .getElementById("start")
+    .addEventListener("change", refresh);
+
+refresh();
+
+</script>
+
+</body>
+</html>
