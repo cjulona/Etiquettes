@@ -73,7 +73,7 @@ button {
 
     padding: 3mm;
 
-    border: 1px solid #ddd;
+    border: 1px dashed #cccccc;
 
     font-size: 10pt;
     line-height: 1;
@@ -104,6 +104,10 @@ button {
 }
 
 @media print {
+
+    .label {
+        border: none !important;
+    }
 
     body * {
         visibility: hidden;
